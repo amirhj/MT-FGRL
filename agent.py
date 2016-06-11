@@ -1,6 +1,7 @@
 import random
-import util, sys
+import util
 import threading
+import copy
 
 
 class Agent(threading.Thread):
@@ -10,10 +11,13 @@ class Agent(threading.Thread):
 		self.setDaemon(True)
 		self.fg = fg
 		self.opt = opt
+		self.alpha = opt['alpha']
+		self.epsilon = opt['epsilon']
 		self.name = name
 		self.agents = agnets
 		self.clock = 1
 		self.log = []
+		self.qlog = []
 		self.episode_finished = True
 		self.finished = False
 
@@ -37,7 +41,7 @@ class Agent(threading.Thread):
 	def policy(self, state):
 		actions = self.get_actions()
 		other_actions = [a for a in actions]
-		
+
 		max_q = None
 		for a in actions:
 			action_profile = self.get_actions_profile(a)
@@ -48,7 +52,7 @@ class Agent(threading.Thread):
 
 		del other_actions[other_actions.index(max_action)]
 
-		if util.flipCoin(self.opt['epsilon']):
+		if util.flipCoin(self.epsilon):
 			return random.choice(other_actions)
 		return max_action
 
@@ -117,7 +121,7 @@ class Agent(threading.Thread):
 	def update(self, state, action_profile, next_state, reward):
 		qstate = (state, ) + action_profile
 		sample = reward + self.opt['gamma'] * self.get_best_responce(next_state)
-		self.qvalues[qstate] = (1 - self.opt['alpha']) * self.qvalues[qstate] + self.opt['alpha'] * sample
+		self.qvalues[qstate] = (1 - self.alpha) * self.qvalues[qstate] + self.alpha * sample
 
 	def is_terminated(self):
 		actions = self.get_actions()
@@ -162,6 +166,7 @@ class Agent(threading.Thread):
 				self.update(state, action_profile, next_state, reward)
 
 				self.log.append(self.fg.vars[self.name]['value'])
+				self.qlog.append(sum(self.qvalues.values()))
 				self.clock += 1
 
 	def get_best_responce(self, state):
@@ -203,3 +208,7 @@ class Agent(threading.Thread):
 	def stop(self):
 		self.episode_finished = False
 		self.finished = True
+
+	def turn_off_learning(self):
+		self.alpha = 0
+		self.epsilon = 0

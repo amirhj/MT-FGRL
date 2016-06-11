@@ -38,3 +38,7 @@ class FactorGraph:
 				if v != var:
 					nvars.add(v)
 		return list(nvars)
+
+	def reset(self):
+		for v in self.vars:
+			self.vars[v]['value'] = 0

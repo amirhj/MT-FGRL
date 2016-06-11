@@ -7,16 +7,17 @@ from scheduler import Scheduler
 
 print 'Reading options...'
 opt_pattern = {'-e': {'name': 'episodes', 'type': 'int', 'default': 200},
-			   '--alpha': {'name': 'alpha', 'type': 'float', 'default': 0.9},
-			   '--gamma': {'name': 'gamma', 'type': 'float', 'default': 0.9},
-			   '--epsilon': {'name': 'epsilon', 'type': 'float', 'default': 0.2},
-			   '-t': {'name': 'timeout', 'type': 'int', 'default': 200}
-			   }
+               '--alpha': {'name': 'alpha', 'type': 'float', 'default': 0.9},
+               '--gamma': {'name': 'gamma', 'type': 'float', 'default': 0.9},
+               '--epsilon': {'name': 'epsilon', 'type': 'float', 'default': 0.2},
+               '-T': {'name': 'timeout', 'type': 'int', 'default': 200},
+               '-t': {'name': 'tests', 'type': 'int', 'default': 20}
+               }
 arg = ArgParser(sys.argv[2:], opt_pattern)
 opt = arg.read()
 
 for o in opt:
-	print "\t",o, opt[o]
+	print "\t", o, opt[o]
 print
 
 fg = FactorGraph()

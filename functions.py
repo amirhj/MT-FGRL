@@ -39,7 +39,7 @@ class Functions2:
 		return -(self.v("x1") - 5)**2 - (self.v("x2") - 2)**2
 
 	def f3(self):
-		x3 = self.v("x3")
+		x3 = self.v("x2")
 		return -(x3 - 5)**4
 
 	def f4(self):

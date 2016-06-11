@@ -1,4 +1,5 @@
-import util, json, os, time
+import util, json, os
+from datetime import datetime
 
 
 class Scheduler:
@@ -17,15 +18,23 @@ class Scheduler:
 			agent = self.agents[a]
 			agent.start()
 
-		for i in range(self.opt['episodes']):
-			print "Episode", i+1, ":",
+		test = 1
+		for i in range(self.opt['episodes']+self.opt['tests']):
+			if i < self.opt['episodes']:
+				print "Episode", i+1, ":",
+			else:
+				print "Test", test, ":",
+				if test == 1:
+					for a in self.agents:
+						agent = self.agents[a]
+						agent.turn_off_learning()
+				test += 1
 
 			for a in self.agents:
 				agent = self.agents[a]
 				agent.reset()
-				# print 'ssss', agent.finished
 
-			# print 'agents resetet', self.agents[]
+			# self.fg.reset()
 
 			termination = ''
 			while True:
@@ -80,8 +89,9 @@ class Scheduler:
 
 		result['optimal'] = max_vars
 
-		folder = 'results/'+time.asctime(time.localtime(time.time()))
+		folder = 'results/'+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 		os.mkdir(folder)
+		os.mkdir(folder+'/qvalues')
 
 		res = open(folder+'/result.txt', 'w')
 		res.write(json.dumps(result, indent=4))
@@ -95,6 +105,15 @@ class Scheduler:
 				i += 1
 			l.close()
 
+		for a in self.agents:
+			i = 1
+			agent = self.agents[a]
+			q = open(folder + '/qvalues/' + a + '.txt', 'w')
+			for r in agent.qlog:
+				q.write("%d %f\n" % (i, r))
+				i += 1
+			q.close()
+
 	def is_terminated(self):
 		terminated = True
 		for a in self.agents:
@@ -106,9 +125,10 @@ class Scheduler:
 
 	def is_timeout(self):
 		timeout = False
-		for a in self.agents:
-			agent = self.agents[a]
-			if agent.clock >= self.opt['timeout']:
-				timeout = True
-				break
+		if self.opt['timeout'] > 0:
+			for a in self.agents:
+				agent = self.agents[a]
+				if agent.clock >= self.opt['timeout']:
+					timeout = True
+					break
 		return timeout
